@@ -9,6 +9,10 @@
  * https://github.com/eusonlito/jquery-countdown
  */
 
+/*
+ * Modified by Hidden <zsombor.paroczi@gmail.com>
+ */
+
 jQuery.fn.countdown = function(userOptions)
 {
   // Default options
@@ -19,28 +23,38 @@ jQuery.fn.countdown = function(userOptions)
     format: "dd:hh:mm:ss",
     startTime: "01:12:32:55",
     digitImages: 6,
-    digitWidth: 67,
-    digitHeight: 90,
+    digitWidth: 33,
+    digitHeight: 45,
     timerEnd: function(){},
-    image: "digits.png",
-    continuous: false
+    continuous: false,
+    
+    futureSeconds: "no"
   };
   var digits = [], intervals = [];
 
+  var pad = function(n){return n<10 ? '0'+n : n}
+  
   // Draw digits in given container
   var createDigits = function(where)
   {
     var c = 0;
+    
+    //check if futureSeconds is set (or not)
+    if (options.futureSeconds!="no")
+        {
+             var futureTime = parseInt(options.futureSeconds);
+             options.format="hh:mm:ss";
+             options.startTime=pad(Math.floor(futureTime/60/60))+":"+pad(Math.floor((futureTime/60)%60))+":"+pad((futureTime%60));
+             console.log(options.startTime);
+        }
     // Iterate each startTime digit, if it is not a digit
     // we'll asume that it's a separator
     for (var i = 0; i < options.startTime.length; i++)
     {
       if (parseInt(options.startTime[i]) >= 0)
       {
-        elem = $('<div id="cnt_' + c + '" class="cntDigit" />').css({
+        elem = $('<div class="cntDigit" />').css({
           height: options.digitHeight,
-          float: 'left',
-          background: 'url(\'' + options.image + '\')',
           width: options.digitWidth
         });
 
@@ -81,8 +95,7 @@ jQuery.fn.countdown = function(userOptions)
       }
       else
       {
-        elem = $('<div class="cntSeparator"/>').css({float: 'left'})
-                                               .text(options.startTime[i]);
+        elem = $('<div class="cntSeparator"/>');
       }
 
       where.append(elem)
@@ -158,8 +171,11 @@ jQuery.fn.countdown = function(userOptions)
     makeMovement(elem, 1);
   };
 
+  //constructor
+  this.addClass("cntWrapper").html("");
   $.extend(options, userOptions);
   createDigits(this);
-  intervals.main = setInterval(function(){ moveDigit(digits.length - 1); },
-                               1000);
+  intervals.main = setInterval(function(){ 
+      moveDigit(digits.length - 1); 
+  },1000);
 };
